@@ -1,0 +1,12 @@
+version: '3.3'
+
+services: 
+    webapp:
+        build: 
+            context: ./app
+        command: ["./redis-go-example"]
+        ports:
+            - "8080:8080"
+
+    redis-db:
+        image: redis:6.0.5
