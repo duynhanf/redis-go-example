@@ -3,27 +3,35 @@ package main
 import (
 	"fmt"
 	"net/http"
+
+	"github.com/duynhanf/redis-go-example/cache"
+	"github.com/duynhanf/redis-go-example/entity"
 )
 
-func hello(w http.ResponseWriter, req *http.Request) {
-
-	fmt.Fprintf(w, "hello\n")
-}
-
-func headers(w http.ResponseWriter, req *http.Request) {
-
-	for name, headers := range req.Header {
-		for _, h := range headers {
-			fmt.Fprintf(w, "%v: %v\n", name, h)
-		}
-	}
-}
+var (
+	appCache cache.AppCache = cache.NewRedisCache("localhost:6379", 0, 10)
+)
 
 func main() {
 
-	http.HandleFunc("/hello", hello)
-	http.HandleFunc("/headers", headers)
+	http.HandleFunc("/getUser", getUser)
+	http.HandleFunc("/postUser", postUser)
 
 	fmt.Println("run server")
 	http.ListenAndServe(":8080", nil)
+}
+
+func getUser(w http.ResponseWriter, req *http.Request) {
+	value := appCache.Get("user1")
+
+	fmt.Fprintf(w, "%#v\n", value)
+}
+
+func postUser(w http.ResponseWriter, req *http.Request) {
+	user := &entity.User{
+		FullName: "Bui Duy Nhan",
+		Age:      10,
+	}
+	appCache.Set("user1", user)
+	fmt.Fprintf(w, "postUser OK\n")
 }
